@@ -40,7 +40,7 @@ class ClickhouseSqlGeneratorTest {
         expectedClauses: List<String>
     ) {
         val tableName = TableName("my_namespace", "my_table")
-        val actualSql = clickhouseSqlGenerator.alterTable(alterationSummary, tableName)
+        val actualSql = clickhouseSqlGenerator.alterTableNonDrop(alterationSummary, tableName)
         expectedClauses.forEach { clause ->
             assertTrue(
                 actualSql.contains(clause),
@@ -59,7 +59,7 @@ class ClickhouseSqlGeneratorTest {
                 hasDedupChange = false
             )
         val tableName = TableName("my_namespace", "my_table")
-        val sql = clickhouseSqlGenerator.alterTable(alterationSummary, tableName)
+        val sql = clickhouseSqlGenerator.alterTableNonDrop(alterationSummary, tableName)
 
         assertDoesNotThrow {
             // Using the StandardSql dialect as a substitute for clickhouse SQL syntax validation.

@@ -124,7 +124,7 @@ abstract class ClickhouseDirectLoadWriter(
     }
 
     @Test
-    @Disabled("https://github.com/airbytehq/airbyte-internal-issues/issues/13574")
+    @Disabled("Dropping columns that are part of the primary key is invariant.")
     override fun testBizarrePkSchemaEvolution() {
         super.testBizarrePkSchemaEvolution()
     }

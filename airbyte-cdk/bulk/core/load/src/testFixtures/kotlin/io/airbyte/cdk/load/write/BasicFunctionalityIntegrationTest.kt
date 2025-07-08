@@ -360,7 +360,7 @@ abstract class BasicFunctionalityIntegrationTest(
                 randomizedNamespace,
                 "test_stream",
                 Append,
-                ObjectType(linkedMapOf("id" to intType)),
+                ObjectType(linkedMapOf("id" to intType, "Date(UTC)" to stringType)),
                 generationId = 0,
                 minimumGenerationId = 0,
                 syncId = 42,
@@ -373,7 +373,7 @@ abstract class BasicFunctionalityIntegrationTest(
                 listOf(
                     InputRecord(
                         stream = stream,
-                        data = """{"id": 5678, "undeclared": "asdf"}""",
+                        data = """{"id": 5678, "undeclared": "asdf", "Date(UTC)": "cat"}""",
                         emittedAtMs = 1234,
                         changes =
                             mutableListOf(

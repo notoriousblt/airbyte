@@ -348,7 +348,7 @@ class ClickhouseAirbyteClientTest {
 
         coEvery { clickhouseAirbyteClient.getChangedColumns(any(), any(), any(), any()) } returns
             alterationSummary
-        coEvery { clickhouseSqlGenerator.alterTable(alterationSummary, mockTableName) } returns
+        coEvery { clickhouseSqlGenerator.alterTableNonDrop(alterationSummary, mockTableName) } returns
             alterTableStatement
         coEvery { clickhouseAirbyteClient.execute(alterTableStatement) } returns
             mockk(relaxed = true)
@@ -373,7 +373,7 @@ class ClickhouseAirbyteClientTest {
 
         coVerifyOrder {
             clickhouseAirbyteClient.getChangedColumns(any(), any(), any(), any())
-            clickhouseSqlGenerator.alterTable(alterationSummary, mockTableName)
+            clickhouseSqlGenerator.alterTableNonDrop(alterationSummary, mockTableName)
             clickhouseAirbyteClient.execute(alterTableStatement)
         }
     }

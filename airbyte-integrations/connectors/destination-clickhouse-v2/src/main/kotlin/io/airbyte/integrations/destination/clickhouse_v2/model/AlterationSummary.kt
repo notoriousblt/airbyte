@@ -14,5 +14,8 @@ data class AlterationSummary(
  * This indicates if any changes were made to the table, excluding PK changes It indicates that we
  * need to run an alter statement.
  */
-fun AlterationSummary.hasApplicableAlterations(): Boolean =
-    !(added.isEmpty() && modified.isEmpty() && deleted.isEmpty())
+fun AlterationSummary.hasNonDestructiveChanges(): Boolean =
+    added.isNotEmpty() && modified.isNotEmpty()
+
+fun AlterationSummary.hasDestructiveChanges(): Boolean =
+    deleted.isNotEmpty()

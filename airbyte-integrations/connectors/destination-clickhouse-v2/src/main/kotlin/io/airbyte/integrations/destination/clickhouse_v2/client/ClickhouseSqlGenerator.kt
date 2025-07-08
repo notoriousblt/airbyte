@@ -52,27 +52,30 @@ class ClickhouseSqlGenerator(
         columnNameMapping: ColumnNameMapping,
         replace: Boolean,
     ): String {
+        val importType = stream.importType
         val pks: List<String> =
-            when (stream.importType) {
-                is Dedupe -> extractPks((stream.importType as Dedupe).primaryKey, columnNameMapping)
+            when (importType) {
+                is Dedupe -> extractPks(importType.primaryKey, columnNameMapping)
                 else -> listOf()
             }
+
+        val pksAsString = pkString(pks)
 
         val columnDeclarations = columnsAndTypes(stream, columnNameMapping, pks)
 
         val forceCreateTable = if (replace) "OR REPLACE" else ""
 
-        val pksAsString =
-            pks.joinToString(",") {
-                // Escape the columns
-                "`$it`"
-            }
-
         val engine =
-            when (stream.importType) {
+            when (importType) {
                 is Dedupe -> "ReplacingMergeTree()"
                 else -> "MergeTree()"
             }
+
+        val dedupeKey = if (pks.isEmpty()) {
+            COLUMN_NAME_AB_RAW_ID
+        } else {
+            "$COLUMN_NAME_AB_RAW_ID, $pksAsString"
+        }
 
         return """
             CREATE $forceCreateTable TABLE `${tableName.namespace}`.`${tableName.name}` (
@@ -82,18 +85,25 @@ class ClickhouseSqlGenerator(
               $COLUMN_NAME_AB_GENERATION_ID UInt32 NOT NULL,
               $columnDeclarations
             )
-            ENGINE = ${engine}
-            ORDER BY (${if (pks.isEmpty()) {
-                "$COLUMN_NAME_AB_RAW_ID"
-            } else {
-                pksAsString
-            }})
+            ENGINE = $engine
+            ORDER BY ($dedupeKey)
+            PRIMARY KEY ($COLUMN_NAME_AB_RAW_ID)
             """.trimIndent()
+    }
+
+    fun modifyOrderBy(pks: List<String>, tableName: TableName): String {
+        val pksAsString = pkString(pks)
+        return "ALTER TABLE `${tableName.namespace}`.`${tableName.name}` MODIFY ORDER BY ($COLUMN_NAME_AB_RAW_ID, $pksAsString)"
+    }
+
+    internal fun pkString(pks: List<String>): String = pks.joinToString(",") {
+        // Escape the columns
+        "`$it`"
     }
 
     internal fun extractPks(
         primaryKey: List<List<String>>,
-        columnNameMapping: ColumnNameMapping
+        columnNameMapping: ColumnNameMapping,
     ): List<String> {
         return primaryKey.map { fieldPath ->
             if (fieldPath.size != 1) {
@@ -331,20 +341,7 @@ class ClickhouseSqlGenerator(
             .joinToString(",\n")
     }
 
-    fun wrapInTransaction(vararg sqlStatements: String): String {
-        val builder = StringBuilder()
-        builder.append("BEGIN TRANSACTION;\n")
-        sqlStatements.forEach {
-            builder.append(it)
-            // No semicolon - statements already end with a semicolon
-            builder.append("\n")
-        }
-        builder.append("COMMIT TRANSACTION;\n")
-
-        return builder.toString()
-    }
-
-    fun alterTable(alterationSummary: AlterationSummary, tableName: TableName): String {
+    fun alterTableNonDrop(alterationSummary: AlterationSummary, tableName: TableName): String {
         val builder =
             StringBuilder()
                 .append("ALTER TABLE `${tableName.namespace}`.`${tableName.name}`")
@@ -355,7 +352,17 @@ class ClickhouseSqlGenerator(
         alterationSummary.modified.forEach { (columnName, columnType) ->
             builder.append(" MODIFY COLUMN `$columnName` ${columnType.sqlNullable()},")
         }
-        alterationSummary.deleted.forEach { columnName ->
+
+        return builder.dropLast(1).toString()
+    }
+
+    fun dropTableColumns(deleted: Set<String>, tableName: TableName): String {
+        val builder =
+            StringBuilder()
+                .append("ALTER TABLE `${tableName.namespace}`.`${tableName.name}`")
+                .appendLine()
+
+        deleted.forEach { columnName ->
             builder.append(" DROP COLUMN `$columnName`,")
         }
 

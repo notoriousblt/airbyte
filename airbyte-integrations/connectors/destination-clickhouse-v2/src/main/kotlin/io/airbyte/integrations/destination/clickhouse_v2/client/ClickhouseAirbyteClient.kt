@@ -23,7 +23,8 @@ import io.airbyte.cdk.load.orchestration.db.direct_load_table.DirectLoadTableSql
 import io.airbyte.integrations.destination.clickhouse_v2.client.ClickhouseSqlGenerator.Companion.DATETIME_WITH_PRECISION
 import io.airbyte.integrations.destination.clickhouse_v2.config.ClickhouseFinalTableNameGenerator
 import io.airbyte.integrations.destination.clickhouse_v2.model.AlterationSummary
-import io.airbyte.integrations.destination.clickhouse_v2.model.hasApplicableAlterations
+import io.airbyte.integrations.destination.clickhouse_v2.model.hasDestructiveChanges
+import io.airbyte.integrations.destination.clickhouse_v2.model.hasNonDestructiveChanges
 import io.airbyte.integrations.destination.clickhouse_v2.spec.ClickhouseConfiguration
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.inject.Singleton
@@ -155,38 +156,22 @@ class ClickhouseAirbyteClient(
                 currentPKs,
             )
 
-        if (columnChanges.hasApplicableAlterations()) {
+        if (columnChanges.hasNonDestructiveChanges()) {
             execute(
-                sqlGenerator.alterTable(
+                sqlGenerator.alterTableNonDrop(
                     columnChanges,
                     properTableName,
-                ),
+
+                )
             )
         }
 
         if (columnChanges.hasDedupChange) {
-            log.info {
-                "Detected deduplication change for table $properTableName, applying deduplication changes"
-            }
-            val tempTableName = tempTableNameGenerator.generate(properTableName)
-            execute(sqlGenerator.createNamespace(tempTableName.namespace))
-            execute(
-                sqlGenerator.createTable(
-                    stream,
-                    tempTableName,
-                    columnNameMapping,
-                    true,
-                ),
-            )
-            execute(
-                sqlGenerator.copyTable(
-                    columnNameMapping,
-                    properTableName,
-                    tempTableName,
-                ),
-            )
-            execute(sqlGenerator.exchangeTable(tempTableName, properTableName))
-            execute(sqlGenerator.dropTable(tempTableName))
+            execute(sqlGenerator.modifyOrderBy(currentPKs, properTableName))
+        }
+
+        if (columnChanges.hasDestructiveChanges()) {
+            execute(sqlGenerator.dropTableColumns(columnChanges.deleted, properTableName))
         }
     }
 
