@@ -299,6 +299,10 @@ The variables for them have been added to :root at the top of this file */
   color: var(--color-active-nav-item-text);
 }
 
+.dropdown__menu hr {
+  margin: 0.5em;
+}
+
 table {
   border-spacing: 0;
   border-collapse: separate;

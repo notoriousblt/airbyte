@@ -18,6 +18,30 @@ const sidebar: SidebarsConfig = {
       items: [
         {
           type: "doc",
+          id: "deprecated-get-embedded-organizations-current-scoped",
+          label: "Get Scoped Token Info",
+          className: "menu__list-item--deprecated api-method get",
+        },
+        {
+          type: "doc",
+          id: "create-embedded-scoped-token",
+          label: "Create Scoped Token",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "deprecated-get-embedded-scoped-token-info",
+          label: "Get Scoped Token Info",
+          className: "menu__list-item--deprecated api-method get",
+        },
+        {
+          type: "doc",
+          id: "get-embedded-scoped-token-info",
+          label: "Get Scoped Token Info",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
           id: "deprecated-list-embedded-source-templates",
           label: "List Source Templates",
           className: "menu__list-item--deprecated api-method post",
@@ -82,30 +106,6 @@ const sidebar: SidebarsConfig = {
           label: "Create Widget Token",
           className: "api-method post",
         },
-        {
-          type: "doc",
-          id: "create-embedded-scoped-token",
-          label: "Create Scoped Token",
-          className: "api-method post",
-        },
-        {
-          type: "doc",
-          id: "deprecated-get-embedded-organizations-current-scoped",
-          label: "Get Scoped Token Info",
-          className: "menu__list-item--deprecated api-method get",
-        },
-        {
-          type: "doc",
-          id: "get-embedded-scoped-token-info",
-          label: "Get Scoped Token Info",
-          className: "api-method get",
-        },
-        {
-          type: "doc",
-          id: "deprecated-get-embedded-scoped-token-info",
-          label: "Get Scoped Token Info",
-          className: "menu__list-item--deprecated api-method get",
-        },
       ],
     },
     {
@@ -120,15 +120,15 @@ const sidebar: SidebarsConfig = {
       items: [
         {
           type: "doc",
-          id: "create-sonar-apis-source-id-request",
-          label: "Request",
-          className: "api-method post",
-        },
-        {
-          type: "doc",
           id: "deprecated-get-sonar-apis",
           label: "List Sources",
           className: "menu__list-item--deprecated api-method get",
+        },
+        {
+          type: "doc",
+          id: "create-sonar-apis-source-id-request",
+          label: "Request",
+          className: "api-method post",
         },
       ],
     },
@@ -144,8 +144,20 @@ const sidebar: SidebarsConfig = {
       items: [
         {
           type: "doc",
-          id: "list-sonar-files-source-id-list-path-path",
-          label: "List Files With Prefix",
+          id: "get-sonar-files-sources",
+          label: "List Sources",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "get-sonar-files-source-id-drives",
+          label: "List Drives",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "get-sonar-files-source-id-drives-drive-id-get-path-path",
+          label: "Drive Stream File",
           className: "api-method get",
         },
         {
@@ -162,20 +174,8 @@ const sidebar: SidebarsConfig = {
         },
         {
           type: "doc",
-          id: "get-sonar-files-source-id-drives-drive-id-get-path-path",
-          label: "Drive Stream File",
-          className: "api-method get",
-        },
-        {
-          type: "doc",
-          id: "get-sonar-files-sources",
-          label: "List Sources",
-          className: "api-method get",
-        },
-        {
-          type: "doc",
-          id: "get-sonar-files-source-id-drives",
-          label: "List Drives",
+          id: "list-sonar-files-source-id-list-path-path",
+          label: "List Files With Prefix",
           className: "api-method get",
         },
       ],
@@ -204,6 +204,18 @@ const sidebar: SidebarsConfig = {
         },
         {
           type: "doc",
+          id: "create-integrations-sources-check",
+          label: "Run Check Config Source",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "get-integrations-sources-check-id-status",
+          label: "Status Check Config Source",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
           id: "get-integrations-sources-id",
           label: "Get Source",
           className: "api-method get",
@@ -219,18 +231,6 @@ const sidebar: SidebarsConfig = {
           id: "delete-integrations-sources-id",
           label: "Delete Source",
           className: "api-method delete",
-        },
-        {
-          type: "doc",
-          id: "create-integrations-sources-check",
-          label: "Run Check Config Source",
-          className: "api-method post",
-        },
-        {
-          type: "doc",
-          id: "get-integrations-sources-check-id-status",
-          label: "Status Check Config Source",
-          className: "api-method get",
         },
         {
           type: "doc",
@@ -252,6 +252,24 @@ const sidebar: SidebarsConfig = {
       items: [
         {
           type: "doc",
+          id: "list-integrations-templates-connections",
+          label: "List Connection Templates",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "create-integrations-templates-connections",
+          label: "Create Connection Template",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "create-integrations-templates-connections-cron-describe",
+          label: "Describe Cron Expression",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
           id: "get-integrations-templates-connections-id",
           label: "Get Connection Template",
           className: "api-method get",
@@ -270,21 +288,15 @@ const sidebar: SidebarsConfig = {
         },
         {
           type: "doc",
-          id: "list-integrations-templates-connections",
-          label: "List Connection Templates",
-          className: "api-method get",
-        },
-        {
-          type: "doc",
-          id: "create-integrations-templates-connections",
-          label: "Create Connection Template",
-          className: "api-method post",
-        },
-        {
-          type: "doc",
-          id: "create-integrations-templates-connections-id-tag",
+          id: "create-integrations-templates-connections-id-tags",
           label: "Tag Connection Template",
           className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "delete-integrations-templates-connections-id-tags-tag-name",
+          label: "Untag Connection Template",
+          className: "api-method delete",
         },
       ],
     },
@@ -312,6 +324,12 @@ const sidebar: SidebarsConfig = {
         },
         {
           type: "doc",
+          id: "list-integrations-templates-sources-global",
+          label: "List Global Source Templates",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
           id: "update-integrations-templates-sources-id",
           label: "Update Source Template",
           className: "api-method patch",
@@ -330,69 +348,57 @@ const sidebar: SidebarsConfig = {
         },
         {
           type: "doc",
-          id: "list-integrations-templates-sources-global",
-          label: "List Global Source Templates",
-          className: "api-method get",
-        },
-        {
-          type: "doc",
-          id: "create-integrations-templates-sources-id-tag",
+          id: "create-integrations-templates-sources-id-tags",
           label: "Tag Source Template",
           className: "api-method post",
         },
+        {
+          type: "doc",
+          id: "delete-integrations-templates-sources-id-tags-tag-name",
+          label: "Untag Source Template",
+          className: "api-method delete",
+        },
       ],
     },
     {
       type: "category",
-      label: "Tool Wrappers - Workspaces",
+      label: "Agents - Chat",
       collapsible: false,
       collapsed: false,
       items: [
         {
           type: "doc",
-          id: "list-tools-workspaces",
-          label: "List Workspaces",
+          id: "create-agents-chat",
+          label: "Post chat message",
+          className: "api-method post",
+        },
+      ],
+    },
+    {
+      type: "category",
+      label: "Agents - Chat History",
+      collapsible: false,
+      collapsed: false,
+      items: [
+        {
+          type: "doc",
+          id: "get-agents-chat-history-thread-id",
+          label: "Chat history by thread ID",
           className: "api-method get",
         },
       ],
     },
     {
       type: "category",
-      label: "Tool Wrappers - Destinations",
+      label: "Agents - Discovery",
       collapsible: false,
       collapsed: false,
       items: [
         {
           type: "doc",
-          id: "create-tools-destinations",
-          label: "Tools Create Destination",
+          id: "create-agents-discovery",
+          label: "Create Discovery Agents",
           className: "api-method post",
-        },
-        {
-          type: "doc",
-          id: "update-tools-destinations-id",
-          label: "Tools Update Destination",
-          className: "api-method patch",
-        },
-      ],
-    },
-    {
-      type: "category",
-      label: "Tool Wrappers - Sources",
-      collapsible: false,
-      collapsed: false,
-      items: [
-        {
-          type: "doc",
-          id: "create-tools-sources",
-          label: "Tools Create Source",
-          className: "api-method post",
-        },
-        {
-          type: "doc",
-          id: "update-tools-sources-id",
-          label: "Tools Update Source",
-          className: "api-method patch",
         },
       ],
     },
@@ -404,14 +410,14 @@ const sidebar: SidebarsConfig = {
       items: [
         {
           type: "doc",
-          id: "get-integrations-definitions-destinations-id",
-          label: "Get Destination Definition",
+          id: "list-integrations-definitions-destinations",
+          label: "List Destination Definitions",
           className: "api-method get",
         },
         {
           type: "doc",
-          id: "list-integrations-definitions-destinations",
-          label: "List Destination Definitions",
+          id: "get-integrations-definitions-destinations-id",
+          label: "Get Destination Definition",
           className: "api-method get",
         },
       ],
@@ -425,26 +431,44 @@ const sidebar: SidebarsConfig = {
         {
           type: "doc",
           id: "get-integrations-definitions-sources-id",
-          label: "Get Source Definition",
+          label: "Source Definition Get",
           className: "api-method get",
         },
         {
           type: "doc",
-          id: "create-integrations-definitions-sources-id-catalog",
-          label: "Create Source Definition Catalog",
+          id: "create-integrations-definitions-sources-source-definition-id-catalog",
+          label: "Source Definition Catalog Create",
           className: "api-method post",
         },
         {
           type: "doc",
-          id: "delete-integrations-definitions-sources-id-catalog",
+          id: "delete-integrations-definitions-sources-source-definition-id-catalog",
           label: "Delete Source Definition Catalog",
           className: "api-method delete",
         },
         {
           type: "doc",
-          id: "get-integrations-definitions-sources-id-catalog",
+          id: "get-integrations-definitions-sources-source-definition-id-catalog",
           label: "Get Source Definition Catalog",
           className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "create-integrations-definitions-sources-source-definition-id-streams",
+          label: "Create Source Definition Catalog Stream",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "update-integrations-definitions-sources-source-definition-id-streams-stream-name",
+          label: "Patch Source Definition Catalog Stream",
+          className: "api-method patch",
+        },
+        {
+          type: "doc",
+          id: "delete-integrations-definitions-sources-source-definition-id-streams-stream-name",
+          label: "Delete Source Definition Catalog Stream",
+          className: "api-method delete",
         },
       ],
     },
@@ -502,15 +526,21 @@ const sidebar: SidebarsConfig = {
     },
     {
       type: "category",
-      label: "Health",
+      label: "Applications",
       collapsible: false,
       collapsed: false,
       items: [
         {
           type: "doc",
-          id: "get-internal-health-check",
-          label: "Health Check",
-          className: "api-method get",
+          id: "create-internal-account-applications",
+          label: "Get Or Create Application",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "create-internal-account-applications-token",
+          label: "Generate Application Token",
+          className: "api-method post",
         },
       ],
     },
@@ -532,25 +562,45 @@ const sidebar: SidebarsConfig = {
           label: "Update Organization Onboarding Progress",
           className: "api-method post",
         },
+        {
+          type: "doc",
+          id: "create-internal-account-organizations-organization-id-signup",
+          label: "Organization Signup",
+          className: "api-method post",
+        },
       ],
     },
     {
       type: "category",
-      label: "Applications",
+      label: "Health",
       collapsible: false,
       collapsed: false,
       items: [
         {
           type: "doc",
-          id: "create-internal-account-applications",
-          label: "Get Or Create Application",
-          className: "api-method post",
+          id: "get-internal-health-check",
+          label: "Health Check",
+          className: "api-method get",
+        },
+      ],
+    },
+    {
+      type: "category",
+      label: "Internal Destinations Definitions",
+      collapsible: false,
+      collapsed: false,
+      items: [
+        {
+          type: "doc",
+          id: "list-internal-integrations-definitions-destinations-wrapped",
+          label: "List Wrapped Destination Definitions",
+          className: "api-method get",
         },
         {
           type: "doc",
-          id: "create-internal-account-applications-token",
-          label: "Generate Application Token",
-          className: "api-method post",
+          id: "get-internal-integrations-definitions-destinations-wrapped-id",
+          label: "Get Wrapped Destination Definition",
+          className: "api-method get",
         },
       ],
     },
@@ -562,14 +612,14 @@ const sidebar: SidebarsConfig = {
       items: [
         {
           type: "doc",
-          id: "create-internal-oauth-mcp-registration",
-          label: "Oauth Registration",
+          id: "create-internal-oauth-mcp-code",
+          label: "Oauth Code",
           className: "api-method post",
         },
         {
           type: "doc",
-          id: "create-internal-oauth-mcp-code",
-          label: "Oauth Code",
+          id: "create-internal-oauth-mcp-registration",
+          label: "Oauth Registration",
           className: "api-method post",
         },
         {
@@ -588,14 +638,14 @@ const sidebar: SidebarsConfig = {
       items: [
         {
           type: "doc",
-          id: "create-internal-oauth-sources-get-embedded-consent-url",
-          label: "Get Embedded Consent Url",
+          id: "create-internal-oauth-sources-complete",
+          label: "Complete Oauth",
           className: "api-method post",
         },
         {
           type: "doc",
-          id: "create-internal-oauth-sources-complete",
-          label: "Complete Oauth",
+          id: "create-internal-oauth-sources-get-embedded-consent-url",
+          label: "Get Embedded Consent Url",
           className: "api-method post",
         },
         {
@@ -603,6 +653,90 @@ const sidebar: SidebarsConfig = {
           id: "create-internal-oauth-sources-revoke",
           label: "Revoke Source Oauth",
           className: "api-method post",
+        },
+      ],
+    },
+    {
+      type: "category",
+      label: "Tool Wrappers - Destinations",
+      collapsible: false,
+      collapsed: false,
+      items: [
+        {
+          type: "doc",
+          id: "create-tools-destinations",
+          label: "Tools Create Destination",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "update-tools-destinations-id",
+          label: "Tools Update Destination",
+          className: "api-method patch",
+        },
+      ],
+    },
+    {
+      type: "category",
+      label: "Tool Wrappers - Sources",
+      collapsible: false,
+      collapsed: false,
+      items: [
+        {
+          type: "doc",
+          id: "create-tools-sources",
+          label: "Tools Create Source",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "update-tools-sources-id",
+          label: "Tools Update Source",
+          className: "api-method patch",
+        },
+      ],
+    },
+    {
+      type: "category",
+      label: "Workspaces",
+      collapsible: false,
+      collapsed: false,
+      items: [
+        {
+          type: "doc",
+          id: "list-workspaces",
+          label: "List Workspaces",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "get-workspaces-stats",
+          label: "Get Workspace Stats",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "create-workspaces-sync",
+          label: "Sync Workspaces",
+          className: "api-method post",
+        },
+        {
+          type: "doc",
+          id: "get-workspaces-workspace-id",
+          label: "Get Workspace",
+          className: "api-method get",
+        },
+        {
+          type: "doc",
+          id: "update-workspaces-workspace-id",
+          label: "Update Workspace",
+          className: "api-method put",
+        },
+        {
+          type: "doc",
+          id: "delete-workspaces-workspace-id",
+          label: "Delete Workspace",
+          className: "api-method delete",
         },
       ],
     },
