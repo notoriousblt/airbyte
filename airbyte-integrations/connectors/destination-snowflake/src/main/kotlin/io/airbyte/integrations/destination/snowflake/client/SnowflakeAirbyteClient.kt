@@ -5,6 +5,7 @@
 package io.airbyte.integrations.destination.snowflake.client
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
+import io.airbyte.cdk.load.CoreTableOperationsClient
 import io.airbyte.cdk.load.client.AirbyteClient
 import io.airbyte.cdk.load.command.DestinationStream
 import io.airbyte.cdk.load.orchestration.db.ColumnNameMapping
@@ -38,7 +39,11 @@ class SnowflakeAirbyteClient(
     private val sqlGenerator: SnowflakeDirectLoadSqlGenerator,
     private val snowflakeColumnUtils: SnowflakeColumnUtils,
     private val snowflakeConfiguration: SnowflakeConfiguration,
-) : AirbyteClient, DirectLoadTableSqlOperations, DirectLoadTableNativeOperations {
+) :
+    AirbyteClient,
+    DirectLoadTableSqlOperations,
+    DirectLoadTableNativeOperations,
+    CoreTableOperationsClient {
 
     private val airbyteColumnNames =
         snowflakeColumnUtils.getFormattedDefaultColumnNames(false).toSet()
@@ -64,41 +69,48 @@ class SnowflakeAirbyteClient(
             null
         }
 
-    override suspend fun createNamespace(namespace: String) {
-        // Check if the schema exists first
-        val schemaExistsResult =
-            dataSource.connection.use { connection ->
-                val databaseName = snowflakeConfiguration.database.toSnowflakeCompatibleName()
-                val statement =
-                    connection.prepareStatement(
-                        """
+    override suspend fun namespaceExists(namespace: String): Boolean {
+        return dataSource.connection.use { connection ->
+            val databaseName = snowflakeConfiguration.database.toSnowflakeCompatibleName()
+            val statement =
+                connection.prepareStatement(
+                    """
                         SELECT COUNT(*) > 0 AS SCHEMA_EXISTS
                         FROM "$databaseName".INFORMATION_SCHEMA.SCHEMATA
                         WHERE SCHEMA_NAME = ?
                     """.andLog()
-                    )
+                )
 
-                // When querying information_schema, snowflake needs the "true" schema name,
-                // so we unescape it here.
-                val unescapedNamespace = namespace.replace("\"\"", "\"")
-                statement.setString(1, unescapedNamespace)
+            // When querying information_schema, snowflake needs the "true" schema name,
+            // so we unescape it here.
+            val unescapedNamespace = namespace.replace("\"\"", "\"")
+            statement.setString(1, unescapedNamespace)
 
-                statement.use {
-                    val resultSet = it.executeQuery()
-                    resultSet.use { rs ->
-                        if (rs.next()) {
-                            rs.getBoolean("SCHEMA_EXISTS")
-                        } else {
-                            false
-                        }
+            statement.use {
+                val resultSet = it.executeQuery()
+                resultSet.use { rs ->
+                    if (rs.next()) {
+                        rs.getBoolean("SCHEMA_EXISTS")
+                    } else {
+                        false
                     }
                 }
             }
+        }
+    }
+
+    override suspend fun createNamespace(namespace: String) {
+        // Check if the schema exists first
+        val schemaExistsResult = namespaceExists(namespace)
 
         if (!schemaExistsResult) {
             // Create the schema only if it doesn't exist
             execute(sqlGenerator.createNamespace(namespace))
         }
+    }
+
+    override suspend fun dropNamespace(namespace: String) {
+        execute(sqlGenerator.dropNamespace(namespace))
     }
 
     override suspend fun createTable(
