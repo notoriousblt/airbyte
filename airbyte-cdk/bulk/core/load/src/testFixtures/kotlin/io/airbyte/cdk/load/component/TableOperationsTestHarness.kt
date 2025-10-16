@@ -7,6 +7,7 @@ package io.airbyte.cdk.load.component
 import io.airbyte.cdk.load.CoreTableOperationsClient
 import io.airbyte.cdk.load.command.DestinationStream
 import io.airbyte.cdk.load.component.TableOperationsFixtures.createAppendStream
+import io.airbyte.cdk.load.component.TableOperationsFixtures.insertRecords
 import io.airbyte.cdk.load.data.AirbyteValue
 import io.airbyte.cdk.load.data.ObjectType
 import io.airbyte.cdk.load.message.Meta
@@ -82,8 +83,9 @@ class TableOperationsTestHarness(private val client: CoreTableOperationsClient) 
     suspend fun insertAndVerifyRecordCount(
         tableName: TableName,
         records: List<Map<String, AirbyteValue>>,
+        columnNameMapping: ColumnNameMapping,
     ) {
-        client.insertRecords(tableName, records)
+        client.insertRecords(tableName, records, columnNameMapping)
         val actualCount = client.countTable(tableName)?.toInt()
 
         assertEquals(records.size, actualCount) {

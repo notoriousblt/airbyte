@@ -6,7 +6,7 @@ package io.airbyte.cdk.load.component
 
 import io.airbyte.cdk.load.CoreTableOperationsClient
 import io.airbyte.cdk.load.component.TableOperationsFixtures as Fixtures
-import io.airbyte.cdk.load.component.TableOperationsFixtures.applyColumnNameMapping
+import io.airbyte.cdk.load.component.TableOperationsFixtures.insertRecords
 import io.airbyte.cdk.load.component.TableOperationsFixtures.sortByTestField
 import io.airbyte.cdk.load.data.AirbyteValue
 import io.airbyte.cdk.load.data.IntegerValue
@@ -119,7 +119,7 @@ interface TableOperationsSuite {
                 columnNameMapping = columnNameMapping,
             )
 
-            client.insertRecords(testTable, inputRecords.applyColumnNameMapping(columnNameMapping))
+            client.insertRecords(testTable, inputRecords, columnNameMapping)
 
             val resultRecords = harness.readTableWithoutMetaColumns(testTable)
 
@@ -164,7 +164,7 @@ interface TableOperationsSuite {
                     mapOf("test" to IntegerValue(42)),
                 )
 
-            client.insertRecords(testTable, records1.applyColumnNameMapping(columnNameMapping))
+            client.insertRecords(testTable, records1, columnNameMapping)
 
             val count1 = client.countTable(testTable)
 
@@ -175,7 +175,7 @@ interface TableOperationsSuite {
                     mapOf("test" to IntegerValue(42)),
                 )
 
-            client.insertRecords(testTable, records2.applyColumnNameMapping(columnNameMapping))
+            client.insertRecords(testTable, records2, columnNameMapping)
 
             val count2 = client.countTable(testTable)
 
@@ -191,7 +191,7 @@ interface TableOperationsSuite {
                     mapOf("test" to IntegerValue(42)),
                 )
 
-            client.insertRecords(testTable, records3.applyColumnNameMapping(columnNameMapping))
+            client.insertRecords(testTable, records3, columnNameMapping)
 
             val count3 = client.countTable(testTable)
 
@@ -229,7 +229,7 @@ interface TableOperationsSuite {
                         Meta.COLUMN_NAME_AB_GENERATION_ID to IntegerValue(genId),
                     ),
                 )
-            client.insertRecords(testTable, inputRecords.applyColumnNameMapping(columnNameMapping))
+            client.insertRecords(testTable, inputRecords, columnNameMapping)
 
             val result = client.getGenerationId(testTable)
 
@@ -269,13 +269,15 @@ interface TableOperationsSuite {
             harness.createTestTableAndVerifyExists(sourceTable, schema, columnNameMapping)
             harness.insertAndVerifyRecordCount(
                 sourceTable,
-                sourceInputRecords.applyColumnNameMapping(columnNameMapping)
+                sourceInputRecords,
+                columnNameMapping,
             )
 
             harness.createTestTableAndVerifyExists(targetTable, schema, columnNameMapping)
             harness.insertAndVerifyRecordCount(
                 targetTable,
-                targetInputRecords.applyColumnNameMapping(columnNameMapping)
+                targetInputRecords,
+                columnNameMapping,
             )
 
             client.overwriteTable(sourceTable, targetTable)
@@ -332,15 +334,13 @@ interface TableOperationsSuite {
 
         try {
             harness.createTestTableAndVerifyExists(sourceTable, schema, columnNameMapping)
-            harness.insertAndVerifyRecordCount(
-                sourceTable,
-                sourceInputRecords.applyColumnNameMapping(columnNameMapping)
-            )
+            harness.insertAndVerifyRecordCount(sourceTable, sourceInputRecords, columnNameMapping)
 
             harness.createTestTableAndVerifyExists(targetTable, schema, columnNameMapping)
             harness.insertAndVerifyRecordCount(
                 targetTable,
-                targetInputRecords.applyColumnNameMapping(columnNameMapping)
+                targetInputRecords,
+                columnNameMapping,
             )
 
             client.copyTable(columnNameMapping, sourceTable, targetTable)
@@ -425,10 +425,7 @@ interface TableOperationsSuite {
                 schema = sourceSchema,
                 stream = sourceStream,
             )
-            harness.insertAndVerifyRecordCount(
-                sourceTable,
-                sourceInputRecords.applyColumnNameMapping(columnNameMapping)
-            )
+            harness.insertAndVerifyRecordCount(sourceTable, sourceInputRecords, columnNameMapping)
 
             harness.createTestTableAndVerifyExists(
                 tableName = targetTable,
@@ -438,7 +435,8 @@ interface TableOperationsSuite {
             )
             harness.insertAndVerifyRecordCount(
                 targetTable,
-                targetInputRecords.applyColumnNameMapping(columnNameMapping)
+                targetInputRecords,
+                columnNameMapping,
             )
 
             client.upsertTable(targetStream, columnNameMapping, sourceTable, targetTable)

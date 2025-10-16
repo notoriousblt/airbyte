@@ -4,6 +4,7 @@
 
 package io.airbyte.cdk.load.component
 
+import io.airbyte.cdk.load.CoreTableOperationsClient
 import io.airbyte.cdk.load.command.Append
 import io.airbyte.cdk.load.command.Dedupe
 import io.airbyte.cdk.load.command.DestinationStream
@@ -300,4 +301,10 @@ object TableOperationsFixtures {
     fun <V> Map<String, V>.applyColumnNameMapping(mapping: ColumnNameMapping) = mapKeys { (k, _) ->
         mapping[k] ?: k
     }
+
+    suspend fun CoreTableOperationsClient.insertRecords(
+        table: TableName,
+        records: List<Map<String, AirbyteValue>>,
+        columnNameMapping: ColumnNameMapping,
+    ) = insertRecords(table, records.applyColumnNameMapping(columnNameMapping))
 }
