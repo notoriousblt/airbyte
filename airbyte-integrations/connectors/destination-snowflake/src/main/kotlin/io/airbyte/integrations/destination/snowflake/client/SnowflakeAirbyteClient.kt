@@ -332,10 +332,27 @@ class SnowflakeAirbyteClient(
     override suspend fun readTable(table: TableName): List<Map<String, Any>> {
         dataSource.connection.use { connection ->
             connection.createStatement().use { statement ->
-                val rs =
-                    statement.executeQuery(
-                        """SELECT * FROM "${table.namespace}"."${table.name}";"""
-                    )
+                statement
+                    .executeQuery("""SELECT * FROM "${table.namespace}"."${table.name}";""")
+                    .use { resultSet ->
+                        val metaData = resultSet.metaData
+                        val columnCount = metaData.columnCount
+                        val result = mutableListOf<Map<String, Any>>()
+
+                        while (resultSet.next()) {
+                            val row = mutableMapOf<String, Any>()
+                            for (i in 1..columnCount) {
+                                val columnName = metaData.getColumnName(i)
+                                val value = resultSet.getObject(i)
+                                if (value != null) {
+                                    row[columnName] = value
+                                }
+                            }
+                            result.add(row)
+                        }
+
+                        return result
+                    }
             }
         }
     }
