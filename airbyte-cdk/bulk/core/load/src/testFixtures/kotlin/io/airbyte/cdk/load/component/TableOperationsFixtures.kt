@@ -25,6 +25,9 @@ import io.airbyte.cdk.load.orchestration.db.CDC_DELETED_AT_COLUMN
 import io.airbyte.cdk.load.orchestration.db.ColumnNameMapping
 import io.airbyte.cdk.load.orchestration.db.TableName
 import java.util.UUID
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.mapKeys
 
 /**
  * Common test fixtures and constants used across table operations test suites. Provides reusable
@@ -288,5 +291,13 @@ object TableOperationsFixtures {
             namespaceMapper = NamespaceMapper(),
         )
 
-    fun List<Map<String, Any>>.sortByTestField() = this.sortedBy { it["test"] as Long }
+    fun <V> List<Map<String, V>>.sortByTestField() = this.sortedBy { it["test"] as Long }
+
+    fun <V> List<Map<String, V>>.applyColumnNameMapping(mapping: ColumnNameMapping) =
+        map { record ->
+            record.applyColumnNameMapping(mapping)
+        }
+    fun <V> Map<String, V>.applyColumnNameMapping(mapping: ColumnNameMapping) = mapKeys { (k, _) ->
+        mapping[k] ?: k
+    }
 }
