@@ -11,6 +11,7 @@ import io.airbyte.cdk.load.component.TableOperationsFixtures.sortByTestField
 import io.airbyte.cdk.load.data.AirbyteValue
 import io.airbyte.cdk.load.data.IntegerValue
 import io.airbyte.cdk.load.message.Meta
+import io.airbyte.cdk.load.orchestration.db.ColumnNameMapping
 import io.airbyte.cdk.load.orchestration.db.TableName
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
 import java.util.UUID
@@ -101,10 +102,12 @@ interface TableOperationsSuite {
      *
      * @param inputRecords Records to insert into the test table
      * @param expectedRecords Expected records after insertion (may differ in type representation)
+     * @param columnNameMapping Column name mapping to use for the test table
      */
     fun `insert records`(
         inputRecords: List<Map<String, AirbyteValue>>,
         expectedRecords: List<Map<String, Any>>,
+        columnNameMapping: ColumnNameMapping,
     ) = runTest {
         val testTable = Fixtures.generateTestTableName("insert-test-table")
         harness.assertTableDoesNotExist(testTable)
@@ -113,13 +116,10 @@ interface TableOperationsSuite {
             harness.createTestTableAndVerifyExists(
                 tableName = testTable,
                 schema = Fixtures.TEST_INTEGER_SCHEMA,
-                columnNameMapping = Fixtures.TEST_MAPPING,
+                columnNameMapping = columnNameMapping,
             )
 
-            client.insertRecords(
-                testTable,
-                inputRecords.applyColumnNameMapping(Fixtures.TEST_MAPPING)
-            )
+            client.insertRecords(testTable, inputRecords.applyColumnNameMapping(columnNameMapping))
 
             val resultRecords = harness.readTableWithoutMetaColumns(testTable)
 
@@ -134,10 +134,19 @@ interface TableOperationsSuite {
         `insert records`(
             inputRecords = Fixtures.SINGLE_TEST_RECORD_INPUT,
             expectedRecords = Fixtures.SINGLE_TEST_RECORD_EXPECTED,
+            columnNameMapping = Fixtures.TEST_MAPPING,
         )
 
-    /** Tests the ability to count rows in a table across multiple insertions. */
-    fun `count table rows`() = runTest {
+    fun `count table rows`() = `count table rows`(columnNameMapping = Fixtures.TEST_MAPPING)
+
+    /**
+     * Tests the ability to count rows in a table across multiple insertions.
+     *
+     * @param columnNameMapping Column name mapping to use for the test table
+     */
+    fun `count table rows`(
+        columnNameMapping: ColumnNameMapping,
+    ) = runTest {
         val testTable = Fixtures.generateTestTableName("count-test-table")
         harness.assertTableDoesNotExist(testTable)
 
@@ -145,7 +154,7 @@ interface TableOperationsSuite {
             harness.createTestTableAndVerifyExists(
                 tableName = testTable,
                 schema = Fixtures.TEST_INTEGER_SCHEMA,
-                columnNameMapping = Fixtures.TEST_MAPPING,
+                columnNameMapping = columnNameMapping,
             )
 
             val records1 =
@@ -155,7 +164,7 @@ interface TableOperationsSuite {
                     mapOf("test" to IntegerValue(42)),
                 )
 
-            client.insertRecords(testTable, records1.applyColumnNameMapping(Fixtures.TEST_MAPPING))
+            client.insertRecords(testTable, records1.applyColumnNameMapping(columnNameMapping))
 
             val count1 = client.countTable(testTable)
 
@@ -166,7 +175,7 @@ interface TableOperationsSuite {
                     mapOf("test" to IntegerValue(42)),
                 )
 
-            client.insertRecords(testTable, records2.applyColumnNameMapping(Fixtures.TEST_MAPPING))
+            client.insertRecords(testTable, records2.applyColumnNameMapping(columnNameMapping))
 
             val count2 = client.countTable(testTable)
 
@@ -182,7 +191,7 @@ interface TableOperationsSuite {
                     mapOf("test" to IntegerValue(42)),
                 )
 
-            client.insertRecords(testTable, records3.applyColumnNameMapping(Fixtures.TEST_MAPPING))
+            client.insertRecords(testTable, records3.applyColumnNameMapping(columnNameMapping))
 
             val count3 = client.countTable(testTable)
 
@@ -192,8 +201,16 @@ interface TableOperationsSuite {
         }
     }
 
-    /** Tests retrieval of the generation ID from inserted records. */
-    fun `get generation id`() = runTest {
+    fun `get generation id`() = `get generation id`(columnNameMapping = Fixtures.TEST_MAPPING)
+
+    /**
+     * Tests retrieval of the generation ID from inserted records.
+     *
+     * @param columnNameMapping Column name mapping to use for the test table
+     */
+    fun `get generation id`(
+        columnNameMapping: ColumnNameMapping = Fixtures.TEST_MAPPING,
+    ) = runTest {
         val testTable = Fixtures.generateTestTableName("gen-id-test-table")
         harness.assertTableDoesNotExist(testTable)
 
@@ -201,7 +218,7 @@ interface TableOperationsSuite {
             harness.createTestTableAndVerifyExists(
                 tableName = testTable,
                 schema = Fixtures.TEST_INTEGER_SCHEMA,
-                columnNameMapping = Fixtures.TEST_MAPPING,
+                columnNameMapping = columnNameMapping,
             )
 
             val genId = 17L
@@ -212,10 +229,7 @@ interface TableOperationsSuite {
                         Meta.COLUMN_NAME_AB_GENERATION_ID to IntegerValue(genId),
                     ),
                 )
-            client.insertRecords(
-                testTable,
-                inputRecords.applyColumnNameMapping(Fixtures.TEST_MAPPING)
-            )
+            client.insertRecords(testTable, inputRecords.applyColumnNameMapping(columnNameMapping))
 
             val result = client.getGenerationId(testTable)
 
@@ -231,11 +245,13 @@ interface TableOperationsSuite {
      * @param sourceInputRecords Records to insert into the source table
      * @param targetInputRecords Initial records in the target table (will be overwritten)
      * @param expectedRecords Expected records in the target table after overwrite
+     * @param columnNameMapping Column name mapping to use for the test tables
      */
     fun `overwrite tables`(
         sourceInputRecords: List<Map<String, AirbyteValue>>,
         targetInputRecords: List<Map<String, AirbyteValue>>,
         expectedRecords: List<Map<String, Any>>,
+        columnNameMapping: ColumnNameMapping,
     ) = runTest {
         assertNotEquals(sourceInputRecords, targetInputRecords) {
             "Source and target table input records must be different to properly test overwrite."
@@ -248,7 +264,6 @@ interface TableOperationsSuite {
         harness.assertTableDoesNotExist(targetTable)
 
         val schema = Fixtures.TEST_INTEGER_SCHEMA
-        val columnNameMapping = Fixtures.TEST_MAPPING
 
         try {
             harness.createTestTableAndVerifyExists(sourceTable, schema, columnNameMapping)
@@ -289,6 +304,7 @@ interface TableOperationsSuite {
             sourceInputRecords = Fixtures.OVERWRITE_SOURCE_RECORDS,
             targetInputRecords = Fixtures.OVERWRITE_TARGET_RECORDS,
             expectedRecords = Fixtures.OVERWRITE_EXPECTED_RECORDS,
+            columnNameMapping = Fixtures.TEST_MAPPING,
         )
 
     /**
@@ -298,13 +314,14 @@ interface TableOperationsSuite {
      * @param sourceInputRecords Records in the source table to be copied
      * @param targetInputRecords Existing records in the target table
      * @param expectedRecords Expected combined records in the target table after copy
+     * @param columnNameMapping Column name mapping to use for the test tables
      */
     fun `copy tables`(
         sourceInputRecords: List<Map<String, AirbyteValue>>,
         targetInputRecords: List<Map<String, AirbyteValue>>,
         expectedRecords: List<Map<String, Any>>,
+        columnNameMapping: ColumnNameMapping,
     ) = runTest {
-        val columnNameMapping = Fixtures.TEST_MAPPING
         val schema = Fixtures.TEST_INTEGER_SCHEMA
 
         val sourceTable = Fixtures.generateTestTableName("copy-test-source-table")
@@ -348,6 +365,7 @@ interface TableOperationsSuite {
             sourceInputRecords = Fixtures.OVERWRITE_SOURCE_RECORDS,
             targetInputRecords = Fixtures.OVERWRITE_TARGET_RECORDS,
             expectedRecords = Fixtures.COPY_EXPECTED_RECORDS,
+            columnNameMapping = Fixtures.TEST_MAPPING,
         )
 
     /**
@@ -357,13 +375,14 @@ interface TableOperationsSuite {
      * @param sourceInputRecords Records to upsert from the source table
      * @param targetInputRecords Existing records in the target table
      * @param expectedRecords Expected records in the target table after upsert
+     * @param columnNameMapping Column name mapping to use for the test tables
      */
     fun `upsert tables`(
         sourceInputRecords: List<Map<String, AirbyteValue>>,
         targetInputRecords: List<Map<String, AirbyteValue>>,
         expectedRecords: List<Map<String, Any>>,
+        columnNameMapping: ColumnNameMapping = Fixtures.ID_TEST_WITH_CDC_MAPPING,
     ) = runTest {
-        val columnNameMapping = Fixtures.ID_TEST_WITH_CDC_MAPPING
         val sourceSchema = Fixtures.ID_AND_TEST_SCHEMA
 
         val uniquePostFix = UUID.randomUUID()
