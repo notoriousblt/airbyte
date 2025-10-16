@@ -8,11 +8,15 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import io.airbyte.cdk.load.CoreTableOperationsClient
 import io.airbyte.cdk.load.client.AirbyteClient
 import io.airbyte.cdk.load.command.DestinationStream
+import io.airbyte.cdk.load.data.AirbyteValue
+import io.airbyte.cdk.load.dataflow.state.PartitionKey
+import io.airbyte.cdk.load.dataflow.transform.RecordDTO
 import io.airbyte.cdk.load.orchestration.db.ColumnNameMapping
 import io.airbyte.cdk.load.orchestration.db.TableName
 import io.airbyte.cdk.load.orchestration.db.direct_load_table.DirectLoadTableNativeOperations
 import io.airbyte.cdk.load.orchestration.db.direct_load_table.DirectLoadTableSqlOperations
 import io.airbyte.cdk.load.util.deserializeToNode
+import io.airbyte.integrations.destination.snowflake.dataflow.SnowflakeAggregate
 import io.airbyte.integrations.destination.snowflake.db.ColumnDefinition
 import io.airbyte.integrations.destination.snowflake.db.escapeJsonIdentifier
 import io.airbyte.integrations.destination.snowflake.db.toSnowflakeCompatibleName
@@ -21,6 +25,7 @@ import io.airbyte.integrations.destination.snowflake.sql.COUNT_TOTAL_ALIAS
 import io.airbyte.integrations.destination.snowflake.sql.SnowflakeColumnUtils
 import io.airbyte.integrations.destination.snowflake.sql.SnowflakeDirectLoadSqlGenerator
 import io.airbyte.integrations.destination.snowflake.sql.andLog
+import io.airbyte.integrations.destination.snowflake.write.load.SnowflakeInsertBuffer
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.inject.Singleton
 import java.sql.ResultSet
@@ -68,6 +73,13 @@ class SnowflakeAirbyteClient(
             }
             null
         }
+
+    /**
+     * TEST ONLY. We have a much more performant implementation in
+     * [io.airbyte.integrations.destination.snowflake.db.SnowflakeDirectLoadDatabaseInitialStatusGatherer]
+     * .
+     */
+    override suspend fun tableExists(table: TableName) = countTable(table) != null
 
     override suspend fun namespaceExists(namespace: String): Boolean {
         return dataSource.connection.use { connection ->
@@ -301,6 +313,32 @@ class SnowflakeAirbyteClient(
             // Return 0 if we can't get the generation ID (similar to ClickHouse approach)
             0L
         }
+
+    override suspend fun insertRecords(table: TableName, records: List<Map<String, AirbyteValue>>) {
+        val a =
+            SnowflakeAggregate(
+                SnowflakeInsertBuffer(
+                    table,
+                    describeTable(table),
+                    this,
+                    snowflakeConfiguration,
+                    snowflakeColumnUtils,
+                )
+            )
+        records.forEach { a.accept(RecordDTO(it, PartitionKey(""), 0, 0)) }
+        a.flush()
+    }
+
+    override suspend fun readTable(table: TableName): List<Map<String, Any>> {
+        dataSource.connection.use { connection ->
+            connection.createStatement().use { statement ->
+                val rs =
+                    statement.executeQuery(
+                        """SELECT * FROM "${table.namespace}"."${table.name}";"""
+                    )
+            }
+        }
+    }
 
     fun createSnowflakeStage(tableName: TableName) {
         execute(sqlGenerator.createSnowflakeStage(tableName))
